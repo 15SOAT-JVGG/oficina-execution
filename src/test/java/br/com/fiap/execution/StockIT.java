@@ -87,6 +87,25 @@ class StockIT {
   }
 
   @Test
+  void rejectsWrongIssuerAndSignature() throws Exception {
+    String path = "/admin/parts/" + UUID.randomUUID() + "/stock";
+    String wrongIssuer =
+        Jwt.issuer("other-issuer")
+            .upn("user")
+            .groups(Set.of("ADMIN"))
+            .sign(TestResources.privateKey);
+    var generator = java.security.KeyPairGenerator.getInstance("RSA");
+    generator.initialize(2048);
+    String wrongKey =
+        Jwt.issuer("oficina-api")
+            .upn("user")
+            .groups(Set.of("ADMIN"))
+            .sign(generator.generateKeyPair().getPrivate());
+    given().auth().oauth2(wrongIssuer).get(path).then().statusCode(401);
+    given().auth().oauth2(wrongKey).get(path).then().statusCode(401);
+  }
+
+  @Test
   void concurrentUpdatesNeverGoNegative() throws Exception {
     UUID id = UUID.randomUUID();
     adapter.adjust(id, 1);
