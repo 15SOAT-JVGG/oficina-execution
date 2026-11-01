@@ -8,6 +8,9 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import java.util.UUID;
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 
 @Path("/admin/parts/{id}/stock")
 @Produces(MediaType.APPLICATION_JSON)
@@ -16,7 +19,14 @@ public class StockResource {
 
   @GET
   @RolesAllowed({"ADMIN", "MECHANIC"})
-  @Operation(summary = "Consultar saldo da peça")
+  @Operation(summary = "Consultar saldo da peça", description = "Disponível para ADMIN e MECHANIC.")
+  @APIResponse(
+      responseCode = "200",
+      description = "Saldo persistido",
+      content = @Content(schema = @Schema(implementation = Stock.class)))
+  @APIResponse(responseCode = "404", description = "Saldo inexistente")
+  @APIResponse(responseCode = "401", description = "Token inválido ou ausente")
+  @APIResponse(responseCode = "403", description = "Papel sem permissão")
   public Response get(@PathParam("id") UUID id) {
     return service
         .get(id)
@@ -30,7 +40,16 @@ public class StockResource {
 
   @PATCH
   @RolesAllowed("ADMIN")
-  @Operation(summary = "Ajustar saldo: positivo para entrada, negativo para saída")
+  @Operation(
+      summary = "Ajustar saldo: positivo para entrada, negativo para saída",
+      description = "Somente ADMIN. O primeiro ajuste positivo cria o saldo.")
+  @APIResponse(
+      responseCode = "200",
+      description = "Saldo atualizado",
+      content = @Content(schema = @Schema(implementation = Stock.class)))
+  @APIResponse(responseCode = "400", description = "Ajuste inválido ou saldo insuficiente")
+  @APIResponse(responseCode = "401", description = "Token inválido ou ausente")
+  @APIResponse(responseCode = "403", description = "Papel sem permissão")
   public Stock adjust(@PathParam("id") UUID id, @QueryParam("adjustment") String adjustment) {
     try {
       if (adjustment == null) throw new IllegalArgumentException();
