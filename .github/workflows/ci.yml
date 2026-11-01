@@ -31,5 +31,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_PROJECT_KEY: ${{ vars.SONAR_PROJECT_KEY }}
         run: |
-          test -n "$SONAR_TOKEN" && test -n "$SONAR_PROJECT_KEY"
-          mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:5.0.0.4389:sonar -Dsonar.projectKey="$SONAR_PROJECT_KEY" -Dsonar.organization=15soat-jvgg -Dsonar.qualitygate.wait=true
+          test -n "$SONAR_TOKEN" || { echo "Secret SONAR_TOKEN ausente" >&2; exit 1; }
+          test -n "$SONAR_PROJECT_KEY" || { echo "Variável SONAR_PROJECT_KEY ausente" >&2; exit 1; }
+          mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:5.0.0.4389:sonar -Dsonar.projectKey="$SONAR_PROJECT_KEY" -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=15soat-jvgg -Dsonar.qualitygate.wait=true
