@@ -1,0 +1,5 @@
+target/
+.local-jwt/
+.env
+.idea/
+*.iml
