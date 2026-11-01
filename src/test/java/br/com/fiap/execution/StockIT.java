@@ -23,6 +23,7 @@ class StockIT {
   given().auth().oauth2(mechanic).get("/admin/parts/"+id+"/stock").then().statusCode(404);
   given().auth().oauth2(mechanic).queryParam("adjustment",1).patch("/admin/parts/"+id+"/stock").then().statusCode(403);
   given().auth().oauth2(admin).patch("/admin/parts/"+id+"/stock").then().statusCode(400);
+  given().auth().oauth2(admin).queryParam("adjustment","invalid").patch("/admin/parts/"+id+"/stock").then().statusCode(400);
   given().auth().oauth2(admin).queryParam("adjustment",0).patch("/admin/parts/"+id+"/stock").then().statusCode(400);
   given().auth().oauth2(admin).queryParam("adjustment",-1).patch("/admin/parts/"+id+"/stock").then().statusCode(400);
   given().auth().oauth2(admin).queryParam("adjustment",10).patch("/admin/parts/"+id+"/stock").then().statusCode(200).body("balance",equalTo(10));
