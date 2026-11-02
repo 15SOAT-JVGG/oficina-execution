@@ -3,6 +3,7 @@ services:
     image: localstack/localstack:3.8
     environment:
       SERVICES: dynamodb
+      PERSISTENCE: "1"
     ports: ["4566:4566"]
     volumes:
       - localstack-data:/var/lib/localstack
