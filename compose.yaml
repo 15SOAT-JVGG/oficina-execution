@@ -1,0 +1,30 @@
+services:
+  localstack:
+    image: localstack/localstack:3.8
+    environment:
+      SERVICES: dynamodb
+      PERSISTENCE: "1"
+    ports: ["4566:4566"]
+    volumes:
+      - localstack-data:/var/lib/localstack
+      - ./infra/localstack-init.sh:/etc/localstack/init/ready.d/init.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "awslocal dynamodb describe-table --table-name oficina-execution-stock-homolog >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  execution:
+    build: .
+    depends_on:
+      localstack: { condition: service_healthy }
+    environment:
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+      AWS_REGION: us-east-1
+      DYNAMODB_ENDPOINT: http://localstack:4566
+      JWT_PUBLIC_KEY_LOCATION: file:/run/secrets/publicKey.pem
+    volumes:
+      - ./.local-jwt/publicKey.pem:/run/secrets/publicKey.pem:ro
+    ports: ["8080:8080"]
+volumes:
+  localstack-data:
